@@ -1,0 +1,14 @@
+Package: wglmm
+Type: Package
+Title: Weighted Generalized Linear Mixed Models
+Version: 1.0
+Date: 2019-06-25
+Author: Patricia Doerr
+Maintainer: Jan Pablo Burgard <burgardj@uni-trier.de>
+Description: Estimates generalized linear mixed models and linear mixed models with transformed dependent variable under a flexible random effects structure and -- if desired -- with survey weights.
+License: GPL
+Imports: Rcpp (>= 1.0.2), lme4, Matrix
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.1.1
+NeedsCompilation: yes
+Packaged: 2020-03-27 11:16:46 UTC; doerr
