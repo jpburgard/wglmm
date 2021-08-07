@@ -25,7 +25,7 @@ wglmm(formula, data = NULL, family = gaussian(), weights = NULL,
 
 \item{tol1}{Convergence criterion for MCEM algorithm}
 
-\item{tol2}{Convergence criterion for opimizations within a MCEM-step}
+\item{tol2}{Convergence criterion for optimizations within a MCEM-step}
 
 \item{trace}{Print output of each MCEM-step?}
 
@@ -56,19 +56,20 @@ For comparability between runs, set a seed due to stochastic optimization.
 }
 \examples{
 \dontrun{
-  library(mvtnorm)
+library(mvtnorm)
 n            <- 200
 beta         <- c(4, -2, -1)
 covmat       <- matrix(0.5, ncol = 2, nrow = 2)
 diag(covmat) <- c(0.7, 1.3)
-
+g1           <- 10
+g2           <- 20
 X1           <- rnorm(n, mean = 2)
 X2           <- rexp(n, rate = 1)
 
-group1 <- rep(1:10, length.out = n)
-group2 <- rep(1:20, length.out = n)
-re1    <- rnorm(10, sd = 2)
-re2    <- rmvnorm(20, sigma = covmat)
+group1 <- rep(1:g1, length.out = n)
+group2 <- rep(1:g2, length.out = n)
+re1    <- rnorm(g1, sd = 2)
+re2    <- rmvnorm(g2, sigma = covmat)
 
 modX  <- model.matrix( ~ X1 + X2)
 modZ1 <- model.matrix( ~ -1 + as.factor(group1))
@@ -79,16 +80,25 @@ eta    <- modX \%*\% beta + modZ1 \%*\% re1 +
           modZ2A \%*\% as.vector(re2[,1]) +
           modZ2B \%*\% as.vector(re2[,2])
 
+# LMM
 lin    <- eta + rnorm(n, sd = 2.3)
+# GLMM - binary data
+prob   <- 1/(1+exp(-eta))
+bin    <- sapply(prob, function(x) rbinom(1, size = 1, prob = x))
 dfsamp <- data.frame(group1 = factor(group1, levels = 1:10),
                      group2 = factor(group2, levels = 1:20),
                      X1 = X1, X2 = X2)
 dfsamp$lin <- lin
+dfsamp$bin <- bin
+
 modLin <- wglmm( lin ~ X1 + X2 + (1|group1) + (1+X1|group2),
             data = dfsamp, trace = TRUE, iter1 = 250,
             iter2 = 1001, MI = 2000)
+modBin <- wglmm( bin ~ X1 + X2 + (1|group1) + (1+X1|group2),
+            data = dfsamp, trace = TRUE, iter1 = 250,
+            iter2 = 1001, MI = 2000, family = binomial())
 }
 }
 \references{
-Burgard, Jans Pablo and Doerr, Patricia (2018). Survey-weighted Generalized Linear Mixed Models. Trier University. Working Paper.
+Burgard, Jan Pablo and Doerr, Patricia (2018). Survey-weighted Generalized Linear Mixed Models. Trier University. Working Paper.
 }

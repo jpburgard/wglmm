@@ -1,4 +1,4 @@
-#' @useDynLib wmm
+#' @useDynLib wglmm
 #' @name wlmm_transform
 #' @export
 #' @title Survey-weighted Linear Mixed Models under Box-Cox and Dual Transformations
@@ -86,7 +86,6 @@ wlmm_transform <- function(formula, data = NULL, transform = "none", lambda = NU
 
     mf$formula <- formula
 
-    # weights falsch abgespeichert, aber wichtig fuer Reihenfolge
     env$formula <- formula
     # env$REML <- FALSE
     mod <- do.call(lmer, env)

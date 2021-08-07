@@ -1,4 +1,4 @@
-#' @useDynLib wmm
+#' @useDynLib wglmm
 #' @title Survey-weighted Generalized Linear Mixed Models
 #' @aliases wglmm
 #' @description Estimates generalized linear mixed models with flexible random effects structure and survey weights.
@@ -59,14 +59,24 @@
 #'           modZ2A %*% as.vector(re2[,1]) +
 #'           modZ2B %*% as.vector(re2[,2])
 #'
+#'# LMM
 #' lin    <- eta + rnorm(n, sd = 2.3)
+#'# GLMM - binary data
+#' prob   <- 1/(1+exp(-eta))
+#' set.seed(8)
+#' bin    <- rbinom(n, size = 1, prob = prob)
 #' dfsamp <- data.frame(group1 = factor(group1, levels = 1:10),
 #'                      group2 = factor(group2, levels = 1:20),
 #'                      X1 = X1, X2 = X2)
 #' dfsamp$lin <- lin
+#' dfsamp$bin <- bin
+#' 
 #' modLin <- wglmm( lin ~ X1 + X2 + (1|group1) + (1+X1|group2),
 #'             data = dfsamp, trace = TRUE, iter1 = 250,
 #'             iter2 = 1001, MI = 2000)
+#' modBin <- wglmm( bin ~ X1 + X2 + (1|group1) + (1+X1|group2),
+#'             data = dfsamp, trace = TRUE, iter1 = 250,
+#'             iter2 = 1001, MI = 2000, family = binomial())
 #' }
 #' @import lme4
 #' @rawNamespace import(Matrix, except = c(cov2cor, toeplitz, update) )
@@ -300,7 +310,7 @@ wglmm <- function(formula, data = NULL, family = gaussian(),
   LLexp <- -.loglikTotImp(Us[,-(n.r+1)], phi.alt, family$family, X, y, Z, CovRE, w, qvec, ni, Us[,n.r+1], scale )
 
   convergence <- max(eps) <= tol1
-  if( !convergence ) warning("No convergence!")
+  if( !convergence & counter != nDecrease) warning("No convergence!")
 
   lin.pred <- as.numeric( tcrossprod( X, t(coefs) ) )
   mu <- family$linkinv(lin.pred  + as.numeric(tcrossprod( Z, t(out$modus) ) ))
